@@ -3,6 +3,7 @@ use crate::{
         app_groups::AppGroupsApi,
         app_ids::{AppIdsApi, Profile},
         developer_session::DeveloperSession,
+        device_type::DeveloperDeviceType,
         devices::DevicesApi,
         teams::{DeveloperTeam, TeamsApi},
     },
@@ -246,6 +247,14 @@ impl<C: MaxCertsCallback> Sideloader<C> {
         Fut: Future<Output = ()>,
     {
         let device_info = IdeviceInfo::from_device(device_provider).await?;
+
+        self.dev_session.set_device_type(
+            device_info
+                .product_type
+                .as_deref()
+                .map(DeveloperDeviceType::from_product_type)
+                .unwrap_or(DeveloperDeviceType::Ios),
+        );
 
         let team = self.get_team().await?;
         self.dev_session
